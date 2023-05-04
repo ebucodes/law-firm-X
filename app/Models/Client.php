@@ -9,4 +9,6 @@ use Illuminate\Notifications\Notifiable;
 class Client extends Model
 {
     use HasFactory, Notifiable;
+    public $table = "clients";
+    public $guarded = [];
 }
