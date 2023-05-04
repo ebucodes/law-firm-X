@@ -14,11 +14,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
-Route::controller(ClientController::class)->group(function () {
-    // Home
-    Route::get('/clients', 'index')->name('index');
-});
+// Route::controller(ClientController::class)->group(function () {
+//     // Home
+//     Route::get('/', 'index')->name('index');
+//     Route::post('/', 'store')->name('store');
+//     Route::post('/{id}', 'update')->name('update');
+// });
+
+Route::resource('/', ClientController::class);

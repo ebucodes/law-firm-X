@@ -5316,21 +5316,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(sweetalert2__WEBPACK_IMPORTED_MODULE_0__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ['clients'],
+  props: ["clients"],
   data: function data() {
     return {
       loading: false,
       showModal: false,
+      showViewModal: false,
+      selectedClient: null,
+      showEditModal: false,
+      editingClient: null,
+      originalClient: null,
       form: {
-        first_name: '',
-        last_name: '',
-        email: '',
-        date_profiled: '',
-        primary_legal_counsel: '',
-        date_of_birth: '',
-        profile_image: '',
-        case_details: ''
-      }
+        first_name: "",
+        last_name: "",
+        email: "",
+        date_profiled: "",
+        primary_legal_counsel: "",
+        date_of_birth: "",
+        profile_image: null,
+        // Change the initial value to null
+        case_details: ""
+      },
+      searchQuery: ""
     };
   },
   methods: {
@@ -5340,37 +5347,73 @@ __webpack_require__.r(__webpack_exports__);
     closeModal: function closeModal() {
       this.showModal = false;
     },
+    viewClient: function viewClient(client) {
+      this.selectedClient = client;
+      this.showViewModal = true;
+    },
+    closeViewModal: function closeViewModal() {
+      this.showViewModal = false;
+      this.selectedClient = null;
+    },
+    handleFileUpload: function handleFileUpload(event) {
+      this.form.profile_image = event.target.files[0];
+    },
     submitForm: function submitForm() {
       var _this = this;
-      // Perform form submission and API call to add the client
-      // Use the values from `this.form` to send the data
-      // After successful submission, close the modal and fetch the updated clients list
-      // Example code:
-      axios.post('/', this.form).then(function () {
+      var formData = new FormData();
+      formData.append("first_name", this.form.first_name);
+      formData.append("last_name", this.form.last_name);
+      formData.append("email", this.form.email);
+      formData.append("date_profiled", this.form.date_profiled);
+      formData.append("primary_legal_counsel", this.form.primary_legal_counsel);
+      formData.append("date_of_birth", this.form.date_of_birth);
+      formData.append("profile_image", this.form.profile_image); // Append the file to the FormData
+      formData.append("case_details", this.form.case_details);
+      axios.post("/", formData).then(function () {
         _this.showModal = false;
         _this.fetchClients();
         _this.resetForm();
         sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Client added successfully!'
+          icon: "success",
+          title: "Success",
+          text: "Client added successfully!"
         }).then(function () {
-          _this.$router.push('/'); // Redirect to the client page
+          _this.$router.push("/"); // Redirect to the client page
         });
       })["catch"](function (error) {
-        console.error(error);
-        sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to add client.'
-        });
+        if (error.response.status === 422) {
+          console.log(error.response.data.errors);
+        } else {
+          console.error(error);
+          sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
+            icon: "error",
+            title: "Error",
+            text: "Failed to add client."
+          });
+        }
+        // console.error(error);
       });
     },
     resetForm: function resetForm() {
-      this.form.first_name = '', this.form.last_name = '', this.form.email = '', this.form.date_profiled = '', this.form.primary_legal_counsel = '', this.form.date_of_birth = '', this.form.profile_image = '', this.form.case_details = '';
+      this.form.first_name = "";
+      this.form.last_name = "";
+      this.form.email = "";
+      this.form.date_profiled = "";
+      this.form.primary_legal_counsel = "";
+      this.form.date_of_birth = "";
+      this.form.profile_image = "";
+      this.form.case_details = "";
     },
     fetchClients: function fetchClients() {
       // Fetch clients list code here
+    }
+  },
+  computed: {
+    filteredClients: function filteredClients() {
+      var _this2 = this;
+      return this.clients.filter(function (client) {
+        return client.last_name.toLowerCase().includes(_this2.searchQuery.toLowerCase());
+      });
     }
   }
 });
@@ -5420,21 +5463,54 @@ var render = function render() {
     on: {
       click: _vm.openModal
     }
-  }, [_vm._v("Add Client")])])]), _vm._v(" "), _c("div", {
+  }, [_vm._v("\n                Add Client\n            ")])])]), _vm._v(" "), _c("div", {
     staticClass: "card"
   }, [_c("div", {
     staticClass: "card-body"
-  }, [_vm.clients.length > 0 ? _c("table", {
+  }, [_c("div", {
+    staticClass: "search-bar"
+  }, [_c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.searchQuery,
+      expression: "searchQuery"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "text",
+      placeholder: "Search by last name"
+    },
+    domProps: {
+      value: _vm.searchQuery
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.searchQuery = $event.target.value;
+      }
+    }
+  })]), _vm._v(" "), _vm.filteredClients.length > 0 ? _c("table", {
     staticClass: "table table-sm table-bordered"
-  }, [_vm._m(0), _vm._v(" "), _c("tbody", _vm._l(_vm.clients, function (client) {
+  }, [_vm._m(0), _vm._v(" "), _c("tbody", _vm._l(_vm.filteredClients, function (client) {
     return _c("tr", {
       key: client.id
-    }, [_c("td", [_vm._v(_vm._s(client.id))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(client.first_name) + " " + _vm._s(client.last_name))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(client.email))]), _vm._v(" "), _c("td", [_vm._v(" " + _vm._s(client.date_profiled))]), _vm._v(" "), _vm._m(1, true)]);
+    }, [_c("td", [_vm._v(_vm._s(client.id))]), _vm._v(" "), _c("td", [_vm._v("\n                            " + _vm._s(client.first_name) + " " + _vm._s(client.last_name) + "\n                        ")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(client.email))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(client.date_profiled))]), _vm._v(" "), _c("td", [_c("button", {
+      staticClass: "btn btn-primary",
+      on: {
+        click: function click($event) {
+          return _vm.viewClient(client);
+        }
+      }
+    }, [_vm._v("\n                                View\n                            ")])])]);
   }), 0)]) : _vm._e()])]), _vm._v(" "), _vm.showModal ? _c("div", [_c("div", {
     staticClass: "modal-overlay"
   }, [_c("div", {
     staticClass: "modal-container"
   }, [_c("h2", [_vm._v("Add Client")]), _vm._v(" "), _c("form", {
+    attrs: {
+      enctype: "multipart/form-data"
+    },
     on: {
       submit: function submit($event) {
         $event.preventDefault();
@@ -5607,7 +5683,23 @@ var render = function render() {
         _vm.$set(_vm.form, "date_of_birth", $event.target.value);
       }
     }
-  })]), _vm._v(" "), _vm._m(2), _vm._v(" "), _c("div", [_c("label", {
+  })]), _vm._v(" "), _c("div", {
+    staticClass: "mb-3"
+  }, [_c("label", {
+    attrs: {
+      "for": "profile_image"
+    }
+  }, [_vm._v("Profile Image:")]), _vm._v(" "), _c("input", {
+    staticClass: "form-control",
+    attrs: {
+      type: "file",
+      id: "profile_image",
+      accept: "image/*"
+    },
+    on: {
+      change: _vm.handleFileUpload
+    }
+  })]), _vm._v(" "), _c("div", [_c("label", {
     attrs: {
       "for": "case_details"
     }
@@ -5644,44 +5736,39 @@ var render = function render() {
     on: {
       click: _vm.closeModal
     }
-  }, [_vm._v("Close")]), _vm._v(" "), _c("button", {
+  }, [_vm._v("\n                            Close\n                        ")]), _vm._v(" "), _c("button", {
     staticClass: "btn btn-primary",
     attrs: {
       type: "submit"
     }
-  }, [_vm._v("Save changes")])])])])])]) : _vm.loading ? _c("div", [_vm._v("\n        Loading...\n      ")]) : _c("div", [_vm._v("\n        No data available.\n      ")])]);
+  }, [_vm._v("\n                            Save changes\n                        ")])])])])])]) : _vm._e(), _vm._v(" "), _vm.showViewModal ? _c("div", [_c("div", {
+    staticClass: "modal-overlay"
+  }, [_c("div", {
+    staticClass: "modal-container"
+  }, [_c("h2", [_vm._v("View Client")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("ID:")]), _vm._v("\n                    " + _vm._s(_vm.selectedClient.id) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("First Name:")]), _vm._v("\n                    " + _vm._s(_vm.selectedClient.first_name) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("Last Name:")]), _vm._v("\n                    " + _vm._s(_vm.selectedClient.last_name) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("Email:")]), _vm._v(" " + _vm._s(_vm.selectedClient.email) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("Date Profiled:")]), _vm._v(" " + _vm._s(_vm.selectedClient.date_profiled) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("Primary Legal Counsel:")]), _vm._v(" " + _vm._s(_vm.selectedClient.primary_legal_counsel) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("Date of Birth:")]), _vm._v(" " + _vm._s(_vm.selectedClient.date_of_birth) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("Case details:")]), _vm._v(" " + _vm._s(_vm.selectedClient.case_details) + "\n                ")]), _vm._v(" "), _c("div", [_c("strong", [_vm._v("Profile Image:")]), _vm._v(" "), _vm.selectedClient.profile_image ? _c("img", {
+    attrs: {
+      src: "/img/" + _vm.selectedClient.profile_image,
+      alt: "Profile Image",
+      width: "100",
+      height: "100"
+    }
+  }) : _vm._e()]), _vm._v(" "), _c("div", {
+    staticClass: "modal-footer"
+  }, [_c("button", {
+    staticClass: "btn btn-secondary",
+    attrs: {
+      type: "button",
+      "data-bs-dismiss": "modal"
+    },
+    on: {
+      click: _vm.closeViewModal
+    }
+  }, [_vm._v("\n                        Close\n                    ")])])])])]) : _vm._e()]);
 };
 var staticRenderFns = [function () {
   var _vm = this,
     _c = _vm._self._c;
   return _c("thead", [_c("tr", [_c("th", [_vm._v("ID")]), _vm._v(" "), _c("th", [_vm._v("Name")]), _vm._v(" "), _c("th", [_vm._v("Email")]), _vm._v(" "), _c("th", [_vm._v("Date Profiled")]), _vm._v(" "), _c("th", [_vm._v("Action")])])]);
-}, function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("td", [_c("button", {
-    staticClass: "btn btn-primary"
-  }, [_vm._v("View")]), _vm._v(" "), _c("button", {
-    staticClass: "btn btn-success"
-  }, [_vm._v("Edit")]), _vm._v(" "), _c("button", {
-    staticClass: "btn btn-danger"
-  }, [_vm._v("Delete")])]);
-}, function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("div", {
-    staticClass: "mb-3"
-  }, [_c("label", {
-    attrs: {
-      "for": "profile_image"
-    }
-  }, [_vm._v("Profile Image:")]), _vm._v(" "), _c("input", {
-    staticClass: "form-control",
-    attrs: {
-      type: "file",
-      id: "profile_image",
-      accept: "image/*"
-    }
-  })]);
 }];
 render._withStripped = true;
 
