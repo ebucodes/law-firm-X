@@ -34,7 +34,3 @@ Description of your project.
 2. Compile the frontend assets: npm run dev
 
 3. Access the application in your web browser: http://localhost:8000/
-
-## Additional Information
-
-- Include any additional information, tips, or important details about the project here.
