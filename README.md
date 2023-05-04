@@ -5,11 +5,11 @@ Law Firm X web app
 ## Prerequisites
 
 - PHP (version 7)
-- Frontend: VueJS
 
 ## Technologies Used
 
 - Laravel (version 8)
+- Frontend: VueJS
 
 ## Installation
 
